@@ -22,7 +22,7 @@
 // Criação dos objetos //
 // Objetos de conexão (Wifi, MQTT)
 WifiClient clienteWifi;
-PubSubClient mqtt(MQTT_HOST, MQTT_PORT, evento, clienteWifi);
+PubSubClient mqtt(MQTT_HOST, MQTT_PORT, eventoMQTT, clienteWifi);
 // Objetos sensores
 DHT dht(DHT_PIN, DHTTYPE);
 // Objetos json
@@ -83,6 +83,7 @@ void iniciaConMQTT()
 		{
       			Serial.println("MQTT falou ao se conectar! ... tentando novamente");
       			delay(500);
+		}
     	}
 }
 // Sincroniza MQTT
@@ -122,7 +123,7 @@ void enviaMQTT(char *topico, char *mensagem)
 	}
 }
 // Lida com eventos assim que uma mensagem MQTT chega (num topico assinado)
-void evento(char *topico, byte *conteudo, unsigned int tamanho)
+void eventoMQTT(char *topico, byte *conteudo, unsigned int tamanho)
 {
 	Serial.print("Mensagem chegou: Tópico -> [");
 	Serial.print(topico);
@@ -183,5 +184,4 @@ void loop()
     		sincMQTT();
    		delay(1000);
   	}
-
 }
