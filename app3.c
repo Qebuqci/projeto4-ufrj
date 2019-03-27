@@ -38,7 +38,7 @@ JsonObject jsonChave = jsonConteudo.createNestedObject("d");
 int32_t IntervaloNotificacao = 10;
 
 // Escopo Funções //
-void inTermSerial;
+void inTermSerial();
 void inWifi();
 void inConMQTT();
 void sincMQTT();
