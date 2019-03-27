@@ -5,8 +5,8 @@
 #include <ArduinoJson.h>
 // Constantes //
 // Configuração Wifi
-#define WIFI_USUARIO "RicardoWifi"
-#define WIFI_SENHA "2983084000"
+#define WIFI_USUARIO "USER WIFI"
+#define WIFI_SENHA "PASS WIFI"
 // Configuração conexão MQTT
 #define MQTT_HOST "XXX.messaging.internetofthings.ibmcloud.com"
 #define MQTT_PORT 1883
@@ -170,7 +170,7 @@ void loop()
 	// (Re)Conexão MQTT
 	inConMQTT();
 	// Assinando um topico para receber mensagens
-	mqtt.subscribe();
+	mqtt.subscribe(MQTT_TOPIC_INTERVAL);
 	sincMQTT();
 	enviaMQTT(MQTT_TOPIC_MSG, sensorizaAmbiente());
 	
