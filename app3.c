@@ -21,7 +21,7 @@
 
 // Escopo Funções //
 void inTermSerial();
-void inWifi();
+void inWifi(char *user, char *pass);
 void inConMQTT();
 void sincMQTT();
 char *sensorizaAmbiente();
@@ -47,141 +47,141 @@ JsonObject jsonChave = jsonConteudo.createNestedObject("d");
 int32_t IntervaloNotificacao = 10;
 
 // Inicia terminal (monitor) serial
-void intTermSerial()
+void inTermSerial()
 {
-	Serial.begin(115200);
-	Serial.setTimeout(2000);
-    	while (!Serial) 
-	{}
-    	Serial.println();
-    	Serial.println("Terminal serial ESP8266");
+  Serial.begin(115200);
+  Serial.setTimeout(2000);
+      while (!Serial) 
+  {}
+      Serial.println();
+      Serial.println("Terminal serial ESP8266");
 }
 // Inicia conexão Wifi
 void inWifi(char *user, char *pass)
 {
-	// Modo estação (cliente)
-	WiFi.mode(WIFI_STA);
-    	WiFi.begin(user, pass);
-    	while (WiFi.status() != WL_CONNECTED)
-    	{
-	    delay(500);
-	    Serial.print(".");
-	}
-	Serial.println("");
-	Serial.println("Wifi conectado!");
+  // Modo estação (cliente)
+      WiFi.mode(WIFI_STA);
+      WiFi.begin(user, pass);
+      while (WiFi.status() != WL_CONNECTED)
+      {
+      delay(500);
+      Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("Wifi conectado!");
 }
 // Inicia conexão MQTT
-void iniciaConMQTT()
+void inConMQTT()
 {
-	while( !mqtt.connected() )
-	{
-		if (mqtt.connect(MQTT_DEVICEID, MQTT_USER, MQTT_TOKEN)) 
-		{
-    			Serial.println("MQTT conectado");
-		}
- 		else
-		{
-      			Serial.println("MQTT falou ao se conectar! ... tentando novamente");
-      			delay(500);
-		}
-    	}
+  while( !mqtt.connected() )
+  {
+    if (mqtt.connect(MQTT_DEVICEID, MQTT_USER, MQTT_TOKEN)) 
+    {
+          Serial.println("MQTT conectado");
+    }
+    else
+    {
+            Serial.println("MQTT falou ao se conectar! ... tentando novamente");
+            delay(500);
+    }
+      }
 }
 // Sincroniza MQTT
 void sincMQTT()
 {
-	mqtt.loop();
+  mqtt.loop();
 }
 // Retorna uma string em json com os dados dos sensores
 char *sensorizaAmbiente()
 {
-	float h, t, p = (0.0, 0.0, 0.0);
-	static char msg[50];
-	// Verifica falha na leitura dos sensores
-	if (isnan(h) || isnan(t))
-	{
-    		Serial.println("Falhou ao ler o sensor!");
-  	}
-	// Caso não tenham 
-	else
-	{
-		h = dht.readHumidity();
-		t = dht.readTemperature();
-		// FALTA * sensor de pressão
-		jsonChave["temp"] = t;
-		jsonChave["humidity"] = h;
-		// FALTA * chave de pressao
-		serializeJson(jsonConteudo, msg, 50);
-		Serial.println(msg);
-	}
-	return msg;
+  float h, t, p = (0.0, 0.0, 0.0);
+  static char msg[50];
+  // Verifica falha na leitura dos sensores
+  if (isnan(h) || isnan(t))
+  {
+        Serial.println("Falhou ao ler o sensor!");
+    }
+  // Caso não tenham 
+  else
+  {
+    h = dht.readHumidity();
+    t = dht.readTemperature();
+    // FALTA * sensor de pressão
+    jsonChave["temp"] = t;
+    jsonChave["humidity"] = h;
+    // FALTA * chave de pressao
+    serializeJson(jsonConteudo, msg, 50);
+    Serial.println(msg);
+  }
+  return msg;
 }
 void enviaMQTT(char *topico, char *mensagem)
 {
-	if ( !mqtt.publish(topico, mensagem) )
-	{
-		Serial.println("Publicação da mensagem falhou !");	
-	}
+  if ( !mqtt.publish(topico, mensagem) )
+  {
+    Serial.println("Publicação da mensagem falhou !");  
+  }
 }
 // Lida com eventos assim que uma mensagem MQTT chega (num topico assinado)
 void eventoMQTT(char *topico, byte *conteudo, unsigned int tamanho)
 {
-	Serial.print("Mensagem chegou: Tópico -> [");
-	Serial.print(topico);
-	Serial.print("] : ");
-	
-	conteudo[tamanho] = 0; 
-	Serial.println( (char *) conteudo);
-	DeserializationError err = deserializeJson(jsonMsgRec, (char *) conteudo);
-	if (err)
-	{
-    		Serial.print(F("deserializeJson() falhou ")); 
-    		Serial.println(err.c_str());
-	}
-	else
-	{
-		JsonObject cmdData = jsonMsgRec.as<JsonObject>();
-		if (0 == strcmp(topico, MQTT_TOPIC_INTERVAL))
-		{
-      			IntervaloNotificacao = cmdData["Intervalo"].as<int32_t>();
-      			Serial.print("Intervalo de notificação alterado para: ");
-      			Serial.println(IntervaloNotificacao);
-      			jsonMsgRec.clear();
-    		}
-		else
-		{
-			Serial.println("Comando desconhecido recebido");
-    		}
-  	}
+  Serial.print("Mensagem chegou: Tópico -> [");
+  Serial.print(topico);
+  Serial.print("] : ");
+  
+  conteudo[tamanho] = 0; 
+  Serial.println( (char *) conteudo);
+  DeserializationError err = deserializeJson(jsonMsgRec, (char *) conteudo);
+  if (err)
+  {
+        Serial.print(F("deserializeJson() falhou ")); 
+        Serial.println(err.c_str());
+  }
+  else
+  {
+    JsonObject cmdData = jsonMsgRec.as<JsonObject>();
+    if (0 == strcmp(topico, MQTT_TOPIC_INTERVAL))
+    {
+            IntervaloNotificacao = cmdData["Intervalo"].as<int32_t>();
+            Serial.print("Intervalo de notificação alterado para: ");
+            Serial.println(IntervaloNotificacao);
+            jsonMsgRec.clear();
+        }
+    else
+    {
+      Serial.println("Comando desconhecido recebido");
+        }
+    }
 
 }
 void setup()
 {
-	inTermSerial();
-	inWifi();
-	inConMQTT();
-	
-	// Inicia sensores
-	dht.begin();
+  inTermSerial();
+  inWifi(WIFI_USUARIO, WIFI_SENHA);
+  inConMQTT();
+  
+  // Inicia sensores
+  dht.begin();
 }
 void loop()
 {
-	// Sincroniza MQTT -> lida com msgs que devem ser enviadas e recebidas
-	sincMQTT();
-	// (Re)Conexão MQTT
-	inConMQTT();
-	// Assinando um topico para receber mensagens
-	mqtt.subscribe(MQTT_TOPIC_INTERVAL);
-	sincMQTT();
-	enviaMQTT(MQTT_TOPIC_MSG, sensorizaAmbiente());
-	
-	Serial.print("Intervalo de Notificação:");
-  	Serial.print(IntervaloNotificacao);
-  	Serial.println();
+  // Sincroniza MQTT -> lida com msgs que devem ser enviadas e recebidas
+  sincMQTT();
+  // (Re)Conexão MQTT
+  inConMQTT();
+  // Assinando um topico para receber mensagens
+  mqtt.subscribe(MQTT_TOPIC_INTERVAL);
+  sincMQTT();
+  enviaMQTT(MQTT_TOPIC_MSG, sensorizaAmbiente());
+  
+  Serial.print("Intervalo de Notificação:");
+    Serial.print(IntervaloNotificacao);
+    Serial.println();
 
-  	// Sincronização com MQTT apos intervalo definido pela aplicação
-  	for (int32_t i = 0; i < IntervaloNotificacao; i++)
-	{
-    		sincMQTT();
-   		delay(1000);
-  	}
+    // Sincronização com MQTT apos intervalo definido pela aplicação
+    for (int32_t i = 0; i < IntervaloNotificacao; i++)
+  {
+        sincMQTT();
+      delay(1000);
+    }
 }
