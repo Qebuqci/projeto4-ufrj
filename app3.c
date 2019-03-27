@@ -21,8 +21,8 @@
 
 // Criação dos objetos //
 // Objetos de conexão (Wifi, MQTT)
-WifiClient wifiClient;
-PubSubClient mqtt(MQTT_HOST, MQTT_PORT, eventoMQTT, wifiClient);
+WiFiClient clienteWifi;
+PubSubClient mqtt(MQTT_HOST, MQTT_PORT, eventoMQTT, clienteWifi);
 // Objetos sensores
 DHT dht(DHT_PIN, DHTTYPE);
 // Objetos json
