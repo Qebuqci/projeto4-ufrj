@@ -21,8 +21,8 @@
 
 // Criação dos objetos //
 // Objetos de conexão (Wifi, MQTT)
-WifiClient clienteWifi;
-PubSubClient mqtt(MQTT_HOST, MQTT_PORT, eventoMQTT, clienteWifi);
+WifiClient wifiClient;
+PubSubClient mqtt(MQTT_HOST, MQTT_PORT, eventoMQTT, wifiClient);
 // Objetos sensores
 DHT dht(DHT_PIN, DHTTYPE);
 // Objetos json
@@ -89,7 +89,7 @@ void iniciaConMQTT()
 // Sincroniza MQTT
 void sincMQTT()
 {
-	mqtt.loop()
+	mqtt.loop();
 }
 // Retorna uma string em json com os dados dos sensores
 char *sensorizaAmbiente()
@@ -113,7 +113,7 @@ char *sensorizaAmbiente()
 		serializeJson(jsonConteudo, msg, 50);
 		Serial.println(msg);
 	}
-	return msg
+	return msg;
 }
 void enviaMQTT(char *topico, char *mensagem)
 {
