@@ -19,6 +19,15 @@
 #define DHT_PIN D5
 #define DHTTYPE DHT11
 
+// Escopo Funções //
+void inTermSerial();
+void inWifi();
+void inConMQTT();
+void sincMQTT();
+char *sensorizaAmbiente();
+void enviaMQTT(char *topico, char *mensagem);
+void eventoMQTT(char *topico, byte *conteudo, unsigned int tamanho);
+
 // Criação dos objetos //
 // Objetos de conexão (Wifi, MQTT)
 WiFiClient clienteWifi;
@@ -36,15 +45,6 @@ JsonObject jsonChave = jsonConteudo.createNestedObject("d");
 
 // Variáveis globais //
 int32_t IntervaloNotificacao = 10;
-
-// Escopo Funções //
-void inTermSerial();
-void inWifi();
-void inConMQTT();
-void sincMQTT();
-char *sensorizaAmbiente();
-void enviaMQTT(char *topico, char *mensagem);
-void eventoMQTT(char *topico, byte *conteudo, unsigned int tamanho);
 
 // Inicia terminal (monitor) serial
 void intTermSerial()
