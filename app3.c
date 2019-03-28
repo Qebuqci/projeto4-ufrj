@@ -3,6 +3,8 @@
 #include <PubSubClient.h>
 #include <DHT.h>
 #include <ArduinoJson.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BMP280.h>
 // Constantes //
 // Configuração Wifi
 #define WIFI_USUARIO "USER WIFI"
@@ -33,6 +35,7 @@ void eventoMQTT(char *topico, byte *conteudo, unsigned int tamanho);
 WiFiClient clienteWifi;
 PubSubClient mqtt(MQTT_HOST, MQTT_PORT, eventoMQTT, clienteWifi);
 // Objetos sensores
+Adafruit_BMP280 bpm;
 DHT dht(DHT_PIN, DHTTYPE);
 // Objetos json
 // "Template" json para mensagens enviadas
@@ -94,7 +97,7 @@ void sincMQTT()
 // Retorna uma string em json com os dados dos sensores
 char *sensorizaAmbiente()
 {
-  float h, t, p = (0.0, 0.0, 0.0);
+  float h, t, p, a = (0.0, 0.0, 0.0, 0.0);
   static char msg[50];
   // Verifica falha na leitura dos sensores
   if (isnan(h) || isnan(t))
@@ -105,11 +108,13 @@ char *sensorizaAmbiente()
   else
   {
     h = dht.readHumidity();
-    t = dht.readTemperature();
-    // FALTA * sensor de pressão
+    t = bpm.readTemperature();
+    p = bpm.readPressure();
+    a = bpm.readAltitude();
     jsonChave["temp"] = t;
     jsonChave["humidity"] = h;
-    // FALTA * chave de pressao
+    jsonChave["pressure"] = p;
+    jsonChave["altitude"] = a;
     serializeJson(jsonConteudo, msg, 50);
     Serial.println(msg);
   }
@@ -162,6 +167,7 @@ void setup()
   
   // Inicia sensores
   dht.begin();
+  bpm.begin();
 }
 void loop()
 {
